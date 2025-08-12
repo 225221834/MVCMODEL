@@ -1,18 +1,5 @@
-const mongoose = require('mongoose');
-
-mongoose.connect('mongodb://localhost:27017/myprojectDB', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
-
-const ProjectSchema = new mongoose.Schema({
-  title: String,
-  image: String,
-  link: String,
-  description: String,
-});
-
-const Project = mongoose.model('Project', ProjectSchema);
+const connectDB = require('./config/db');
+const Project = require('./models/projects');
 
 const sampleData = [
   {
@@ -35,9 +22,18 @@ const sampleData = [
   },
 ];
 
-Project.insertMany(sampleData)
-  .then(() => {
+const seedData = async () => {
+  await connectDB();
+
+  try {
+    await Project.deleteMany({});
+    await Project.insertMany(sampleData);
     console.log("Sample data inserted");
-    mongoose.connection.close();
-  })
-  .catch(err => console.error(err));
+  } catch (err) {
+    console.error(err);
+  } finally {
+    process.exit();
+  }
+};
+
+seedData();
